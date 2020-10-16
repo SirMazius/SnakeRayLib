@@ -5,6 +5,9 @@ Board::Square Board::board[Board::TAM][Board::TAM];
 vector<string> Board::levels;
 int Board::screenWidth;
 int Board::screenHeight;
+Snake* Board::snake;
+Vector2 Board::snak1;
+Vector2 Board::snak2;
 
 
 void Board::CreateBoard(int mode = 0) {
@@ -37,23 +40,23 @@ void Board::InitBoard(Snake * s) {
 }
 
 void Board::LoadBoards() {
+    const regex nameRegex("level\\d.csv");
     fstream f;
     auto path = filesystem::current_path();
     for (const auto& entry : filesystem::directory_iterator(path)) {
-        if (entry.path().filename() == "level1.csv") { // Regex para los niveles o ponerlos a pelo
+        if (regex_match(entry.path().filename().string(), regex(nameRegex))) { // Regex para los niveles o ponerlos a pelo
             f.open(entry.path().filename(), ios::in);
-            string line;
+            string line = "";
             string level = "";
             while (getline(f, line)) {
                 if (line != "\n") { // !f.eof()
                     for (int i = 0; i < line.length(); i++) {
-                        if (line.at(i) == '0' || line.at(i) == '1')
-                        level += line.at(i);
+                        if (line.at(i) == '0' || line.at(i) == '1') {
+                            level += line.at(i);
+                        }
                      }
                 }
             }
-            levels.push_back(level);
-            levels.push_back(level);
             levels.push_back(level);
             f.close();
         }
@@ -61,25 +64,36 @@ void Board::LoadBoards() {
 }
 
 void Board::PlaceFood() {
-    bool foodPlaced = false;
     int randX;
     int randY;
-    while (!foodPlaced)
-    {
-        randX = rand() % TAM;
-        randY = rand() % TAM;
-
-        foodPlaced = true;
-        for (const Vector2 & snakeChunk : snake->bodyList)
+    for (int i = 0; i < 2; i++) {
+        bool foodPlaced = false;
+        while (!foodPlaced)
         {
-            if (board[randX][randY] == Obstacle || ((int)snakeChunk.x == randX && (int)snakeChunk.y == randY)) {
-                foodPlaced = false;
-                break;
+            randX = rand() % TAM;
+            randY = rand() % TAM;
+
+            foodPlaced = true;
+            for (const Vector2& snakeChunk : snake->bodyList)
+            {
+                if (board[randX][randY] == Food  || board[randX][randY] == Obstacle || ((int)snakeChunk.x == randX && (int)snakeChunk.y == randY)) {
+                    foodPlaced = false;
+                    break;
+                }
             }
         }
+        board[randX][randY] = Food;
+        if (i == 0) {
+            snak1.x = randX;
+            snak1.y = randY;
+        }
+        else {
+            snak2.x = randX;
+            snak2.y = randY;
+        }
+        
     }
-
-    board[randX][randY] = Food;
+    
 }
 
 

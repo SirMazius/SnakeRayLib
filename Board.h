@@ -8,6 +8,7 @@
 #include <iostream>
 #include <regex>
 #include <fstream>
+
 using namespace std;
 class Board {
 
@@ -24,6 +25,8 @@ public :
 	static Square board[TAM][TAM];
 	static vector<string> levels;
 	static Snake * snake;
+	static Vector2 snak1;
+	static Vector2 snak2;
 	static void DrawBoard();
 	static void DrawCells();
 	static void Draw();

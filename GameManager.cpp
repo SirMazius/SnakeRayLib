@@ -49,6 +49,7 @@ void relocate(Snake& s);
 void initGameVariables(Texture2D * rlLogo, Font * customFont, Snake & s);
 void loadHighScores();
 void writeScore();
+void drawPoints();
 void drawLevelSelectionMenu(Snake & s);
 const int screenWidth = 800;
 const int screenHeight = 900;
@@ -100,11 +101,13 @@ int main(int argc, char* argv[])
         case 2: // Game
             keyInput(s);
             updateGame(s);
+            drawPoints();
             s.Draw();
             Board::Draw();
             break;
         case 3: // GamePaused
             keyInput(s);
+            drawPoints();
             s.Draw();
             Board::Draw();
             drawPauseMenu();
@@ -136,11 +139,16 @@ int main(int argc, char* argv[])
     return 0;
 }
 
+void drawPoints() {
+    string pointsText = "Points : " + to_string(gI.points);
+    DrawText(pointsText.c_str() , screenWidth / 2.8, screenHeight - 70, 40, BLACK);
+}
+
 void keyInput(Snake & s) { // TODO: Mover el init board aqui
     auto & gameState = gI.gameState;
     if (gameState == (int)GameStates::titleScreen) {
         if (IsKeyPressed(KEY_SPACE)) {
-            gameState = GameStates::gameScreen;
+            gameState = GameStates::levelSelectionScreen;
         }
     }
     else if (gameState == (int)GameStates::gameScreen) {
@@ -182,22 +190,38 @@ void keyInput(Snake & s) { // TODO: Mover el init board aqui
     
 }
 
+void teleport(Snake& s) {
+
+    Vector2& snakeHead = s.bodyList.front();
+    Board::board[(int)snakeHead.x][(int)snakeHead.y] = Board::Empty;
+    if (snakeHead.x == Board::snak1.x && snakeHead.y == Board::snak1.y) {
+        snakeHead.x = Board::snak2.x;
+        snakeHead.y = Board::snak2.y;
+        Board::board[(int)snakeHead.x][(int)snakeHead.y] = Board::Empty;
+    }
+    else {
+        snakeHead.x = Board::snak1.x;
+        snakeHead.y = Board::snak1.y;
+        Board::board[(int)snakeHead.x][(int)snakeHead.y] = Board::Empty;
+    }
+}
+
 void checkSnakeMovement(Snake & s) { // Comida obstaculo serpiente
     Vector2 snakeHead = s.bodyList.front();
     int & points = gI.points;
     auto & gameState = gI.gameState;
     if (Board::board[(int)snakeHead.x][(int)snakeHead.y] == Board::Food) { // Si hay comida se garantiza que la serpiente no ha pasado por ahi
-        s.Eat();
         points++;
-        Board::PlaceFood(s);
-        Board::board[(int)snakeHead.x][(int)snakeHead.y] = Board::Empty;
+        teleport(s);
+        s.Eat();
+        Board::PlaceFood();
     }
     else if (Board::board[(int)snakeHead.x][(int)snakeHead.y] == Board::Obstacle || s.CheckCollision()) { // Comprobamos el impacto
         loadHighScores(); // Cargamos las puntuaciones y nos preparamos para mostrar la pantalla de fin
         gameState = GameStates::gameOver;
-        std::cout << "Hola caracola te has comida una polla\n";
     }
 }
+
 
 void drawIntroLogo(Texture2D * t, double & windowTimeOffset) {
     auto & gameState = gI.gameState;
@@ -229,7 +253,7 @@ void drawLevelSelectionMenu(Snake & s) {
     for (int i = 0; i < Board::levels.size(); i++) {
         //buttons.push_back({ screenWidth / 2 - 50, 150 + i * 10, 78, 50 });
         Rectangle button { screenWidth / 2 - 50, 150 + i * 60, 78, 50 };
-
+        DrawText(to_string(i).c_str(), button.x + 33, button.y + 10, 20, BLACK);
         if ((CheckCollisionPointRec(GetMousePosition(), button))) {
             DrawRectangleLines(button.x, button.y, button.width, button.height, RED);
             if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
@@ -305,7 +329,7 @@ void relocate(Snake & s) {
 void initGameVariables(Texture2D* rlLogo, Font* customFont, Snake& s) {
     *rlLogo = LoadTexture("raylib_logo.png");
     *customFont = LoadFont("mecha.png");
-    gI.gameState = GameStates::levelSelectionScreen;
+    gI.gameState = GameStates::logoScreen;
     gI.points = 0;
     gI.highScoresList.clear();
     loadHighScores();
