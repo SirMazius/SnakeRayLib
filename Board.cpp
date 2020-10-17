@@ -49,7 +49,7 @@ void Board::LoadBoards() {
             string line = "";
             string level = "";
             while (getline(f, line)) {
-                if (line != "\n") { // !f.eof()
+                if (line != "\n") {
                     for (int i = 0; i < line.length(); i++) {
                         if (line.at(i) == '0' || line.at(i) == '1') {
                             level += line.at(i);
