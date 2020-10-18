@@ -44,7 +44,7 @@ void DrawManager::DrawStartMenu() {
         DrawTextEx(*customFont, "SNAKE!", currentPos, customFont->baseSize * 20, 8, BLACK);
 
         if (sin(animationTime * 5) > 0) {
-            DrawText("PRESS START to PLAY", GetScreenWidth() / 3, GetScreenHeight() / 1.5f, 20, LIGHTGRAY);
+            DrawText("PRESS ENTER to PLAY", GetScreenWidth() / 3, GetScreenHeight() / 1.5f, 20, LIGHTGRAY);
         }
     }
 }
@@ -85,8 +85,8 @@ void DrawManager::DrawIntroLogo() {
 void DrawManager::DrawLevelSelectionMenu() {
     DrawText("Select level", screenWidth / 3.0f, 100, 40, BLACK);
 
-    // Iteramos sobre todos los niveles que se han cargado.
-    for (int i = 0; i < Board::levels.size(); i++) {
+    // Iteramos sobre todos los niveles que se han cargado el nivel 0 es vacio.
+    for (int i = 0; i < Board::levels.size()+1; i++) {
         // Dibujamos cada boton con un cierto desfase.
         Rectangle button{ screenWidth / 2 - 50, 150 + i * 60, 78, 40 };
         DrawText(to_string(i).c_str(), button.x + 33, button.y + 10, 20, BLACK);

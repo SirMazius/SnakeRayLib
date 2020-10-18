@@ -119,7 +119,7 @@ void keyInput(Snake & s) {
     auto & gameState = gI.gameState;
 
     if (gameState == GameStates::titleScreen) {
-        if (IsKeyPressed(KEY_SPACE)) {
+        if (IsKeyPressed(KEY_ENTER)) {
             DrawManager::animationTime = 0;
             gameState = GameStates::levelSelectionScreen;
         }
@@ -269,12 +269,15 @@ void loadHighScores() {
     fstream file;
     file.open(scoresFileName, ios::in);
     string textLine;
+    gI.highScoresList.clear();
     while (getline(file, textLine)) {
         string subStringName, subStringScore;
         subStringName = textLine.substr(0, textLine.find(","));
         subStringScore = textLine.substr(textLine.find(",")+1, textLine.size());
         gI.highScoresList.push_back(Score{ subStringName, stoi(subStringScore) });
+        cout << subStringName << endl;
     }
+    cout << "----------------------------" << endl;
 
     sort(gI.highScoresList.begin(), gI.highScoresList.end(), [](Score a, Score b) {return a.score > b.score; });
     file.close();

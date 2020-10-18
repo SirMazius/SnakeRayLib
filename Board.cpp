@@ -56,11 +56,12 @@ void Board::LoadBoards() {
     const regex nameRegex("level\\d.csv");
     fstream f;
     auto path = filesystem::current_path() /= "Resources";
+    
     // Recorremos los ficheros de la carpeta Resources.
     for (const auto& entry : filesystem::directory_iterator(path)) {
         // En caso de que el fichero cumpla con la expresion regular lo procesamos.
         if (regex_match(entry.path().filename().string(), regex(nameRegex))) {
-            f.open(entry.path().filename(), ios::in);
+            f.open(entry.path(), ios::in);
             string line = "";
             string level = "";
             // Recorremos linea a linea el fichero y almacenamos los en un string
@@ -78,6 +79,7 @@ void Board::LoadBoards() {
             f.close();
         }
     }
+    
 }
 /*
     Crea la comida de la serpiente teniendo en cuenta que esta no cae en
