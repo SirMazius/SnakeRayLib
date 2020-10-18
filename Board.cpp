@@ -55,7 +55,7 @@ void Board::LoadBoards() {
     // Expresion regular para verficar el nombre del fichero.
     const regex nameRegex("level\\d.csv");
     fstream f;
-    auto path = filesystem::current_path();
+    auto path = filesystem::current_path() /= "Resources";
     // Recorremos los ficheros de la carpeta Resources.
     for (const auto& entry : filesystem::directory_iterator(path)) {
         // En caso de que el fichero cumpla con la expresion regular lo procesamos.

@@ -16,7 +16,7 @@ void DrawManager::InitDrawManager(Snake* s, Font* cF, GameInfo* gI, Texture2D* t
 	logoTexture = t;
     screenWidth = GetScreenWidth();
     screenHeight = GetScreenHeight();
-    animationTime = 0;
+    animationTime = -1;
 }
 
 void DrawManager::DrawPauseMenu() {
@@ -58,6 +58,7 @@ void DrawManager::DrawPoints() {
     Hacemos aparecer la animacion con un efecteo fade-in fade-out.
 */
 void DrawManager::DrawIntroLogo() {
+    
     float opacity;
     // Durante el primer segundo aumentandomos la opacidad progresivamente.
     if (animationTime <= 1) {

@@ -22,7 +22,7 @@ const int screenWidth = 800;
 const int screenHeight = 900;
 const int NAMEMAXCHAR = 3;
 
-const string scoresFileName = "highScores.dat";
+const string scoresFileName = "Resources\\highScores.dat";
 GameInfo gI;
 
 int main(int argc, char* argv[])
@@ -255,8 +255,8 @@ void relocate(Snake & s) {
 }
 
 void initGameVariables(Texture2D* rlLogo, Font* customFont, Snake& s) {
-    *rlLogo = LoadTexture("raylib_logo.png");
-    *customFont = LoadFont("mecha.png");
+    *rlLogo = LoadTexture("Resources\\raylib_logo.png");
+    *customFont = LoadFont("Resources\\mecha.png");
     gI.gameState = GameStates::logoScreen;
     gI.points = 0;
     gI.highScoresList.clear();
