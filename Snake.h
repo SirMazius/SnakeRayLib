@@ -4,30 +4,31 @@
 #include <list>
 #include <raylib.h>
 
+/*
+    Gestiona el movimiento de la serpiente asi como su interaccion
+    consigo misma y el manejo de la comida.
+*/
+
 class Snake {
-
-    /*
-        Solo refrescamos la pantalla cuando se mueve ?? look mas clasic
-    */
-
     void MoveBody();
-    void MoveHead(); // Se encarga de mover la cabeza en funcion de la direccion
-    // void Grow
+    void MoveHead(); 
     enum Direction { Up = 8, Down = 2, Left = 4, Right = 6 };
 
 public:
-
-    Snake(int x, int y); // Crea a la serpiente en algun lugar del mapa y con una direccion
+    // Crea a la serpiente en algun lugar del mapa.
+    Snake(int x, int y); 
     Snake();
     void Draw();
-    void Move(); // Cada vez que te vas a mover compruebas si el final coincide con comida, si coincide mueves todo y creas una al final si al acabar de mover coincide la cabeza con alguna parte de la serpiente u obstaculo pues pierdes
+    void Move(); 
     void GoUp();
     void GoDown();
     void GoRight();
     void GoLeft();
     void UpdateLastDirection();
-    void Eat(); // Guardamos la posicion del objeto que nos hemos comido, cuando el final de la serpiente pase por ahi hay que crecer
-    bool CheckCollision(); // Comprueba colision contra todo
+    // Guardamos la posicion del objeto que nos hemos comido, cuando el final de la serpiente pase por ahi hay que crecer.
+    void Eat(); 
+    // Comprueba colision con las partes del cuerpo.
+    bool CheckCollision(); 
     std::list<Vector2> bodyList;
     std::list<Vector2> foodList;
     Direction currentDirection;

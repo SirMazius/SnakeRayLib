@@ -6,6 +6,10 @@
 #include "raymath.h"
 #include <string>
 #include <iostream>
+
+/*
+	Clase encargada del dibujado de las diferentes pantallas del juego.
+*/
 class DrawManager
 {
 	static Snake* snake;
@@ -17,11 +21,11 @@ class DrawManager
 public:
 	static double animationTime;
 	static void InitDrawManager(Snake* s, Font* cF, GameInfo* gI, Texture2D* t);
-	static void DrawPauseMenu(); // ok
-	static void DrawStartMenu(); // ok
-	static void DrawPoints(); // ok
-	static void DrawIntroLogo(); // ok
-	static void DrawLevelSelectionMenu(); // ok
-	static void DrawEndGameMenu();
+	static void DrawPauseMenu(); 
+	static void DrawStartMenu(); 
+	static void DrawPoints(); 
+	static void DrawIntroLogo(); 
+	static void DrawLevelSelectionMenu(); 
+	static void DrawEndGameMenu(); 
 };
 

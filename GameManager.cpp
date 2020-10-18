@@ -9,9 +9,6 @@
 #include "GameInfoStructs.h"
 #include "DrawManager.h"
 using namespace std;
-/*
-
-*/
 
 
 void keyInput(Snake & s);
@@ -25,7 +22,7 @@ const int screenWidth = 800;
 const int screenHeight = 900;
 const int NAMEMAXCHAR = 3;
 
-const std::string scoresFileName = "highScores.dat";
+const string scoresFileName = "highScores.dat";
 GameInfo gI;
 
 int main(int argc, char* argv[])
@@ -34,71 +31,78 @@ int main(int argc, char* argv[])
     // Initialization
     //--------------------------------------------------------------------------------------
 
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
-    loadHighScores();
+    InitWindow(screenWidth, screenHeight, "Snake!");
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
     // TODO: inicializar todas estas variables en una funcion
     Texture2D  rayLibLogoTexture;
     Font customFont;
     Snake s;
-    
+
+    loadHighScores();
     initGameVariables(&rayLibLogoTexture, & customFont, s);
+
     Board::InitBoard(&s);
     Board::LoadBoards();
+
     DrawManager::InitDrawManager(&s, &customFont, &gI, &rayLibLogoTexture);
+
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        static double windowTimeOffset = GetTime(); // TODO: Esto se puede sacar de aqui
         BeginDrawing();
-        cout << DrawManager::animationTime << endl;
-
         ClearBackground(RAYWHITE);
+
+        // Gestion de la pantalla en la que nos encotramos.
         switch (gI.gameState) {
-        case 0: // Anim intro
+        case GameStates::logoScreen: // Anim logo intro
             DrawManager::DrawIntroLogo();
             break;
 
-        case 1: // Start Menu
-            DrawManager::DrawStartMenu();
+        case GameStates::titleScreen: // Start Menu
             keyInput(s);
+            DrawManager::DrawStartMenu();
             break;
-        case 2: // Game
+
+        case GameStates::gameScreen : // Game
             keyInput(s);
             updateGame(s);
             DrawManager::DrawPoints();
-            // drawPoints();
             s.Draw();
             Board::Draw();
             break;
-        case 3: // GamePaused
+
+        case GameStates::gamePause: // GamePaused
             keyInput(s);
             DrawManager::DrawPoints();
             s.Draw();
             Board::Draw();
             DrawManager::DrawPauseMenu();
             break;
-        case 4: // End Game
+
+        case GameStates::gameOver: // End Game
             keyInput(s);
             DrawManager::DrawEndGameMenu();
             break;
-        case 5: // Reset
+
+        case GameStates::gameReset: // Reset
             initGameVariables(&rayLibLogoTexture, &customFont, s);
             gI.gameState = GameStates::logoScreen;
             break;
-        case 6: // level selection
+
+        case GameStates::levelSelectionScreen: // level selection
             DrawManager::DrawLevelSelectionMenu();
             break;
         }
        
-        
+        // Incrementamos el tiempo.
         DrawManager::animationTime += GetFrameTime();
         EndDrawing();
     }
 
     // De-Initialization
     UnloadTexture(rayLibLogoTexture);
+    UnloadFont(customFont);
     //--------------------------------------------------------------------------------------
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
@@ -106,46 +110,56 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-void keyInput(Snake & s) { // TODO: Mover el init board aqui
+
+/*
+    Gestionamos los inputs del jugador en funcion del estado en el
+    que nos encontremos.
+*/
+void keyInput(Snake & s) { 
     auto & gameState = gI.gameState;
-    if (gameState == (int)GameStates::titleScreen) {
+
+    if (gameState == GameStates::titleScreen) {
         if (IsKeyPressed(KEY_SPACE)) {
             DrawManager::animationTime = 0;
             gameState = GameStates::levelSelectionScreen;
         }
     }
-    else if (gameState == (int)GameStates::gameScreen) {
-        if (IsKeyPressed(KEY_KP_8)) {
+    else if (gameState == GameStates::gameScreen) {
+        if (IsKeyPressed(KEY_W)) {
             s.GoUp();
         }
-        else if (IsKeyPressed(KEY_KP_2)) {
+        else if (IsKeyPressed(KEY_S)) {
             s.GoDown();
         }
-        else if (IsKeyPressed(KEY_KP_4)) {
+        else if (IsKeyPressed(KEY_A)) {
             s.GoLeft();
         }
-        else if (IsKeyPressed(KEY_KP_6)) {
+        else if (IsKeyPressed(KEY_D)) {
             s.GoRight();
         } 
         else if (IsKeyPressed(KEY_SPACE)) {
             gameState = GameStates::gamePause;
         }
     }
-    else if (gameState == (int)GameStates::gamePause) {
+    else if (gameState == GameStates::gamePause) {
         if (IsKeyPressed(KEY_SPACE)) {
-            DrawManager::animationTime = 0;
             gameState = GameStates::gameScreen;
         }
     }
-    else if (gameState == (int)GameStates::gameOver) {
+    else if (gameState == GameStates::gameOver) {
         int key = GetKeyPressed();
-        std::cout << key << std::endl;
+        // Si pulsamos retroceso borramos un caracter.
         if (IsKeyPressed(KEY_BACKSPACE)) {
             gI.playerName.pop_back();
         }
+        // Comprobamos que caracteres puede introducir el jugador.
         else if (gI.playerName.length() < NAMEMAXCHAR && (key >= 32) && (key <= 125) && (key != KEY_SPACE)) {
             gI.playerName += char(key);
         }
+        /*
+            Comprobamos que se ha introducido un nombre para el jugador, lo guardamos
+            y reiniciamos el juego.
+        */ 
         else if (IsKeyPressed(KEY_ENTER) && gI.playerName.length() == NAMEMAXCHAR) {
             writeScore();
             DrawManager::animationTime = 0;
@@ -155,10 +169,17 @@ void keyInput(Snake & s) { // TODO: Mover el init board aqui
     
 }
 
+
+/*
+    Una vez la serpiente se come un snack generamos un portal
+    que la mueve a la localizacion del otro.
+*/
 void teleport(Snake& s) {
 
     Vector2& snakeHead = s.bodyList.front();
+    // Marcamos la posicion del primer snack que nos hemos comido como limpio.
     Board::board[(int)snakeHead.x][(int)snakeHead.y] = Board::Empty;
+    // Si el snack que nos hemos comido es el snack1 nos movemos al 2 y viceversa.
     if (snakeHead.x == Board::snak1.x && snakeHead.y == Board::snak1.y) {
         snakeHead.x = Board::snak2.x;
         snakeHead.y = Board::snak2.y;
@@ -171,14 +192,22 @@ void teleport(Snake& s) {
     }
 }
 
+/*
+    Comprobamos si la serpiente interactua con algun objeto
+    o si choca consigo misma.
+*/
 void checkSnakeMovement(Snake & s) { // Comida obstaculo serpiente
     Vector2 snakeHead = s.bodyList.front();
     int & points = gI.points;
     auto & gameState = gI.gameState;
-    if (Board::board[(int)snakeHead.x][(int)snakeHead.y] == Board::Food) { // Si hay comida se garantiza que la serpiente no ha pasado por ahi
+    // Comprobamos si hay comida en la casilla.
+    if (Board::board[(int)snakeHead.x][(int)snakeHead.y] == Board::Food) { 
         points++;
+        // Movemos la cabeza de la serpiente a la localizacion del otro snack.
         teleport(s);
+        // Anyadimos un snack a la lista de comida de la serpiente.
         s.Eat();
+        // Volvemos a anayadir comida al tablero.
         Board::PlaceFood();
     }
     else if (Board::board[(int)snakeHead.x][(int)snakeHead.y] == Board::Obstacle || s.CheckCollision()) { // Comprobamos el impacto
@@ -187,31 +216,40 @@ void checkSnakeMovement(Snake & s) { // Comida obstaculo serpiente
     }
 }
 
+/*
+    Actualizamos el juego cada 0.5s
+*/
 void updateGame(Snake & s) {
     static float frameTime = 0;
-    static bool isPaused = false;
+    // Incrementamos el tiempo.
     frameTime += GetFrameTime();
-
+    // Cada 0.5s actualizamos el juego y reseteamos el tiempo.
     if (frameTime > 0.5) {
             s.Move();
+            // Comprobamos si la serpiente se ha salido de los limites del tablero.
             relocate(s);
             s.UpdateLastDirection();
+            // Comprobamos si el movimiento de la serpiente interactua con algun objeto.
             checkSnakeMovement(s);
             frameTime = 0;
     }
 }
 
+/*
+    Comprobamos si la serpiente sigue dentro de los limites
+    de la partida en caso contrario la volvemos a meter.
+*/
 void relocate(Snake & s) {
     if (s.bodyList.front().x == -1) {
-        s.bodyList.front().x = 15;
+        s.bodyList.front().x = Board::TAM-1;
     }
-    else if (s.bodyList.front().x == 16) {
+    else if (s.bodyList.front().x == Board::TAM) {
         s.bodyList.front().x = 0;
     }
     else if (s.bodyList.front().y == -1) {
-        s.bodyList.front().y = 15;
+        s.bodyList.front().y = Board::TAM-1;
     }
-    else if (s.bodyList.front().y == 16) {
+    else if (s.bodyList.front().y == Board::TAM) {
         s.bodyList.front().y = 0;
     }
 }
@@ -228,25 +266,25 @@ void initGameVariables(Texture2D* rlLogo, Font* customFont, Snake& s) {
 }
 
 void loadHighScores() {
-    std::fstream file;
-    file.open(scoresFileName, std::ios::in);
-    std::string textLine;
-    while (std::getline(file, textLine)) {
-        std::string subStringName, subStringScore;
+    fstream file;
+    file.open(scoresFileName, ios::in);
+    string textLine;
+    while (getline(file, textLine)) {
+        string subStringName, subStringScore;
         subStringName = textLine.substr(0, textLine.find(","));
         subStringScore = textLine.substr(textLine.find(",")+1, textLine.size());
-        gI.highScoresList.push_back(Score{ subStringName, std::stoi(subStringScore) });
+        gI.highScoresList.push_back(Score{ subStringName, stoi(subStringScore) });
     }
 
-    std::sort(gI.highScoresList.begin(), gI.highScoresList.end(), [](Score a, Score b) {return a.score > b.score; });
+    sort(gI.highScoresList.begin(), gI.highScoresList.end(), [](Score a, Score b) {return a.score > b.score; });
     file.close();
 }
 
 void writeScore() {
     Score score{ gI.playerName, gI.points };
-    std::fstream file;
-    file.open(scoresFileName, std::ios::app);
-    std::string newScore = score.playerName + "," + std::to_string(score.score) + "\n";
+    fstream file;
+    file.open(scoresFileName, ios::app);
+    string newScore = score.playerName + "," + to_string(score.score) + "\n";
     file << newScore;
     file.close();
 }

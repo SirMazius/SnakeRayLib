@@ -22,8 +22,12 @@ Snake::Snake() {
     bodyList.push_back(Vector2{ (float)x + 2, (float)y });
 }
 
+/*
+    Movemos el cuerpo de la serpiente de atras adelante hasta 
+    el ultimo segmento antes de la cabeza.
+*/
 void Snake::MoveBody() {
-    for (auto it = bodyList.rbegin(); it != bodyList.rend(); it++) { // Actualizamos desde detras de la cabeza hasta el final
+    for (auto it = bodyList.rbegin(); it != bodyList.rend(); it++) { 
         auto auxIt = it;
         auxIt++;
         if (auxIt != bodyList.rend()) {
@@ -33,6 +37,9 @@ void Snake::MoveBody() {
     }
 }
 
+/*
+    En funcion de la tecla que hayamos pulsado movemos la cabeza.
+*/
 void Snake::MoveHead() {
     auto headIt = bodyList.begin();
     switch (currentDirection) {
@@ -52,18 +59,24 @@ void Snake::MoveHead() {
 
 }
 
+/*
+    Mueve la serpiente entera y hace crecer la serpiente en
+    caso de que sea necesario.
+*/
 void Snake::Move() {
     Vector2 posTail = bodyList.back();
 
     MoveBody();
     MoveHead();
-
-    if (!foodList.empty() && posTail.x == foodList.front().x && posTail.y == foodList.front().y) { // Si el final coincide con la comida hay que a�adir
+    // Comprobamos si el final de la serpiente coincide con comida, si es asi hacemos crecer la serpiente.
+    if (!foodList.empty() && posTail.x == foodList.front().x && posTail.y == foodList.front().y) {
         bodyList.push_back(foodList.front());
         foodList.pop_front();
     }
 }
-
+/*
+    Comprobamos la colision de la cabeza de la serpiente con su cuerpo.
+*/
 bool Snake::CheckCollision() {
     auto headIt = bodyList.begin();
     for (auto it = ++bodyList.begin(); it != bodyList.end(); it++) {
@@ -101,29 +114,37 @@ void Snake::GoLeft() {
         currentDirection = Left;
     }
 }
-
+/*
+    lastDirection nos permite asegurarnos de que la serpiente no puede hacer
+    giros de 180.
+*/
 void Snake::UpdateLastDirection() {
     lastDirection = currentDirection;
 }
 
-void Snake::Draw() { // Cuadrados negros para el cuerpo y rojos para la cabeza
+/*
+    Dibujamos la serpiente en rojo la cabeza y en verde el cuerpo.
+*/
+void Snake::Draw() { 
 
     Vector2 upperLeftVec;
     Vector2 lowerRightVec;
-
+    // Coordenadas de la cabeza.
     upperLeftVec.x = bodyList.begin()->x * 50 + 10;
     upperLeftVec.y = bodyList.begin()->y * 50 + 10;
-    lowerRightVec.x = /*bodyList.begin()->x * 50 + */30;
-    lowerRightVec.y = /*bodyList.begin()->y * 50 +*/ 30;
-
+    lowerRightVec.x = 30;
+    lowerRightVec.y = 30;
+    // Dibujamos la cabeza.
     DrawRectangleV(upperLeftVec, lowerRightVec, RED);
 
+    // Recorremos la lista del cuerpo.
     for (auto snakeChunkIt = ++bodyList.begin(); snakeChunkIt != bodyList.end(); snakeChunkIt++) {
         upperLeftVec.x = snakeChunkIt->x * 50 + 10;
         upperLeftVec.y = snakeChunkIt->y * 50 + 10;
-        lowerRightVec.x = /*bodyList.begin()->x * 50 + */30;
-        lowerRightVec.y = /*bodyList.begin()->y * 50 +*/ 30;
+        lowerRightVec.x = 30;
+        lowerRightVec.y = 30;
+        // Dibujamos cada pedazo del cuerpo.
         DrawRectangleV(upperLeftVec, lowerRightVec, GREEN);
     }
-    //DrawRectangleV(Vector2 position, Vector2 size, Color color);
+    
 }
